@@ -113,10 +113,10 @@ chmod +x *.sh *.py hooks/*.sh
 
 ```json
 {
+  "default_cdp": "9222",
   "default_target": "oc_xxxx_notification",
   "cdp_targets": {
-    "9221": "oc_xxxx_notification",
-    "9222": "oc_xxxx_main",
+    "9222": "oc_xxxx_notification",
     "9223": "oc_xxxx_demand",
     "9224": "oc_xxxx_code_1",
     "9225": "oc_xxxx_code_2",
@@ -125,16 +125,19 @@ chmod +x *.sh *.py hooks/*.sh
 }
 ```
 
-- `default_target`：默认消息通知群；普通代码任务不传 `--cdp` 和 `--target` 时发到这里；
+- `default_cdp`：默认浏览器端口；未传 `--cdp` 时使用该端口，显式传入时覆盖默认值；
+- `default_target`：默认工位的消息通知群；与 `default_cdp` 组成默认浏览器和通知组合；
 - `cdp_targets`：CDP 端口与飞书群的对应关系；只传 `--cdp 9226` 时，dispatch 自动使用 `9226` 对应的群；
 - `--target`：可选的临时覆盖；只有某次任务要改发其他群时才需要传。
+
+`cdp_targets[default_cdp]` 必须与 `default_target` 相同；本例即 `9222 → oc_xxxx_notification`。
 
 检查 JSON 格式：
 
 ```bash
 cd /root/.openclaw/skills/codex-dispatch
 jq empty dispatch-config.json
-jq '.default_target, .cdp_targets' dispatch-config.json
+jq '.default_cdp, .default_target, .cdp_targets' dispatch-config.json
 ```
 
 必须看到自己的真实群 ID，不能仍然是 `oc_xxxx_*`。配置完成后，dispatch 的选择顺序是：
@@ -194,7 +197,7 @@ Codex 单任务派发入口。课堂里最优先讲这个文件。
 
 - `-n, --name NAME`：任务名，用于生成 `TASK_ID` 和查看日志；不传时默认使用 `--tmux-session` 的值。
 - `-g, --group, --target ID`：可选。显式覆盖通知目标；不传时按 CDP 映射，无法映射则使用 `dispatch-config.json` 的默认消息通知群。
-- `--cdp PORT`：可选。浏览器 CDP 端口；自动写入 Prompt、环境变量和任务元数据。
+- `--cdp PORT`：可选。浏览器 CDP 端口；不传时读取 `default_cdp`，显式传入时覆盖默认值，并自动写入 Prompt、环境变量和任务元数据。
 - `-s, --session KEY`：回调 session key。
 - `-w, --workdir DIR` / `--workdir DIR`：可选覆盖 Codex 的工作目录；默认 `/root`，普通任务无需传。
 - `--sandbox MODE`：沙箱模式，例如 `read-only`、`workspace-write`、`danger-full-access`；不传则使用 Codex 自身配置。

@@ -17,7 +17,7 @@ allowed-tools: Bash(codex-dispatch:*)
 ## 固定流程（必须）
 
 1. 先回复用户：`收到，已将任务委派给 Codex 执行。`
-2. 确定参数：`USER_TASK`、`TMUX_SESSION`，浏览器任务再提供 `CDP_PORT`。任务名默认继承 `TMUX_SESSION`，工作目录默认 `/root`。
+2. 确定参数：`USER_TASK`、`TMUX_SESSION`；需要覆盖默认浏览器时再提供 `CDP_PORT`。任务名默认继承 `TMUX_SESSION`，工作目录默认 `/root`。
 3. 调用 `dispatch-codex.sh`，不要直接运行 `codex` 或 `codex exec`。
 4. dispatch 会写任务状态、启动 tmux、发送启动通知；hook 会在任务完成后写结果和发送完成通知。
 5. dispatch 命令返回后立即回复用户 tmux 观察命令，不要 attach，不要轮询等待任务完成。
@@ -36,7 +36,7 @@ allowed-tools: Bash(codex-dispatch:*)
 
 - `FEISHU_TARGET`：显式覆盖通知目标；不传时按 `CDP_PORT` 映射，无法映射则使用配置中的 `default_target`。
 - `WORKDIR`：仅任务不能在默认 `/root` 下执行时覆盖。
-- `CDP_PORT`：浏览器任务使用的 CDP 端口。通过 `--cdp` 传入后，dispatch 会自动注入 Prompt、环境变量和任务元数据，业务 Prompt 不要重复拼接。
+- `CDP_PORT`：可选的浏览器端口覆盖值。不传时使用 `dispatch-config.json` 中的 `default_cdp`；通过 `--cdp` 传入后，dispatch 会覆盖默认值，并自动注入 Prompt、环境变量和任务元数据。
 - `MODEL`：只在用户明确要求临时换模型时传 `--model`。
 - `SANDBOX`：Codex sandbox 模式；不传则使用 Codex 自身配置。
 - `RESUME_SESSION_ID`：需要续跑指定 Codex 会话时传 `--resume`。
