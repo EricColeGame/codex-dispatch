@@ -366,7 +366,7 @@ def run_tmux(args: argparse.Namespace) -> int:
     openai_api_key = _read_codex_api_key()
     if CODEX_BASE_URL:
         subprocess.check_call(tmux_cmd(socket_path, "set-environment", "-t", session, "OPENAI_BASE_URL", CODEX_BASE_URL))
-        print(f"Set OPENAI_BASE_URL={CODEX_BASE_URL[:30]}...", flush=True)
+        print("OPENAI_BASE_URL injected into tmux session", flush=True)
     else:
         subprocess.run(tmux_cmd(socket_path, "set-environment", "-u", "-t", session, "OPENAI_BASE_URL"),
                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
