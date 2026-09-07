@@ -58,27 +58,27 @@ touch ~/.codex/config.toml
 然后把下面这一行合并进 `~/.codex/config.toml`：
 
 ```toml
-notify = ["/root/.openclaw/skills/codex-dispatch/hooks/notify-agi.sh"]
+notify = ["/home/ubuntu/.openclaw/skills/codex-dispatch/hooks/notify-agi.sh"]
 ```
 
 注意：
 
 - 不要覆盖学生原来 `~/.codex/config.toml` 里的模型、账号、sandbox 等配置，只增加或合并 `notify`。
 - 如果学生把项目安装到别的位置，要把上面路径改成自己机器上的真实 `hooks/notify-agi.sh` 路径。
-- 如果配置文件里已经有 `notify = [...]`，就把 `/root/.openclaw/skills/codex-dispatch/hooks/notify-agi.sh` 加进原数组，不要重复写两个 `notify` 字段。
+- 如果配置文件里已经有 `notify = [...]`，就把 `/home/ubuntu/.openclaw/skills/codex-dispatch/hooks/notify-agi.sh` 加进原数组，不要重复写两个 `notify` 字段。
 
 例如已经有其他 notify 命令时，可以整理成：
 
 ```toml
 notify = [
-  "/root/.openclaw/skills/codex-dispatch/hooks/notify-agi.sh"
+  "/home/ubuntu/.openclaw/skills/codex-dispatch/hooks/notify-agi.sh"
 ]
 ```
 
 验证：
 
 ```bash
-test -x /root/.openclaw/skills/codex-dispatch/hooks/notify-agi.sh
+test -x /home/ubuntu/.openclaw/skills/codex-dispatch/hooks/notify-agi.sh
 grep -n 'notify' ~/.codex/config.toml
 ```
 
@@ -91,13 +91,13 @@ grep -n 'notify' ~/.codex/config.toml
 推荐固定放到 OpenClaw skills 目录下：
 
 ```text
-/root/.openclaw/skills/codex-dispatch
+/home/ubuntu/.openclaw/skills/codex-dispatch
 ```
 
 确认脚本可执行：
 
 ```bash
-cd /root/.openclaw/skills/codex-dispatch
+cd /home/ubuntu/.openclaw/skills/codex-dispatch
 chmod +x *.sh *.py hooks/*.sh
 ```
 
@@ -106,7 +106,7 @@ chmod +x *.sh *.py hooks/*.sh
 首次派发任务前，必须打开当前项目目录里的配置文件：
 
 ```text
-/root/.openclaw/skills/codex-dispatch/dispatch-config.json
+/home/ubuntu/.openclaw/skills/codex-dispatch/dispatch-config.json
 ```
 
 默认内容使用课堂占位值，不能直接照搬。把其中的飞书 `chat_id` 全部替换成学生自己的真实群 ID：
@@ -135,7 +135,7 @@ chmod +x *.sh *.py hooks/*.sh
 检查 JSON 格式：
 
 ```bash
-cd /root/.openclaw/skills/codex-dispatch
+cd /home/ubuntu/.openclaw/skills/codex-dispatch
 jq empty dispatch-config.json
 jq '.default_cdp, .default_target, .cdp_targets' dispatch-config.json
 ```
@@ -153,18 +153,18 @@ jq '.default_cdp, .default_target, .cdp_targets' dispatch-config.json
 下面不传 `--target`，用于验证刚才配置的 `default_target` 是否生效。
 
 ```bash
-cd /root/.openclaw/skills/codex-dispatch
+cd /home/ubuntu/.openclaw/skills/codex-dispatch
 
 env -u CLAUDECODE ./dispatch-codex.sh \
   --tmux-session demo-codex-readme \
-  --workdir /root/Documents/dispatch-demo/codex \
+  --workdir /home/ubuntu/Documents/dispatch-demo/codex \
   -p "在当前目录创建 README.md，内容写一行 hello from codex dispatch。完成后汇总结果。"
 ```
 
 查看 tmux 现场：
 
 ```bash
-tmux -S /root/clawdbot-tmux-sockets/codex-code.sock \
+tmux -S /home/ubuntu/clawdbot-tmux-sockets/codex-code.sock \
   attach -t demo-codex-readme
 ```
 
@@ -179,7 +179,7 @@ Ctrl+b，然后按 d
 ```bash
 env -u CLAUDECODE ./dispatch-codex.sh \
   --tmux-session demo-codex-model \
-  --workdir /root/Documents/dispatch-demo/codex \
+  --workdir /home/ubuntu/Documents/dispatch-demo/codex \
   --model "<模型名>" \
   --cdp 9226 \
   -p "在当前目录创建 README.md，内容写一行 hello from codex model override。完成后汇总结果。"
@@ -240,7 +240,7 @@ Codex 运行器。它不是课堂主入口，主要被 `dispatch-codex.sh` 调�
 - `--model MODEL`：模型覆盖；不传就使用 Codex 自身默认配置。
 - `--codex-bin PATH`：Codex CLI 路径；默认读取 `CODEX_BIN`，再查找 `codex`。
 - `--tmux-session NAME`：tmux 会话名；默认 `codex-agent`。
-- `--tmux-socket-dir DIR`：tmux socket 目录；默认 `/root/clawdbot-tmux-sockets`。
+- `--tmux-socket-dir DIR`：tmux socket 目录；默认 `/home/ubuntu/clawdbot-tmux-sockets`。
 - `--tmux-socket-name NAME`：tmux socket 文件名；默认 `codex-code.sock`。
 - `--interactive-wait-s SECONDS`：interactive 启动后等待 N 秒再打印 tmux 快照。
 - `--output-file FILE`：headless 模式下最后消息输出文件。
@@ -335,17 +335,17 @@ Codex 完成通知 hook。Codex tmux 模式下，任务完成后由 Codex notify
 Codex dispatch 固定使用：
 
 ```text
-/root/clawdbot-tmux-sockets/codex-code.sock
+/home/ubuntu/clawdbot-tmux-sockets/codex-code.sock
 ```
 
 只要 Claw Remote 后端读取同一个 socket，就能看到 Codex 任务现场。
 
 ```bash
-tmux -S /root/clawdbot-tmux-sockets/codex-code.sock list-sessions
+tmux -S /home/ubuntu/clawdbot-tmux-sockets/codex-code.sock list-sessions
 ```
 
 任务状态文件：
 
 ```text
-/root/.openclaw/skills/codex-dispatch/data/
+/home/ubuntu/.openclaw/skills/codex-dispatch/data/
 ```

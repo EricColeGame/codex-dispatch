@@ -42,7 +42,7 @@ TASK_ID=""
 FEISHU_TARGET="${FEISHU_TARGET:-}"
 CDP_PORT="${CDP_PORT:-}"
 CALLBACK_SESSION=""
-WORKDIR="/root"
+WORKDIR="/home/ubuntu"
 SANDBOX=""
 YOLO="1"
 SKIP_GIT_REPO_CHECK=""
@@ -81,7 +81,7 @@ fi
 # Locate the config before resolving runtime defaults. An explicit --cdp or
 # CDP_PORT always wins; otherwise use the configured default browser.
 if [ -z "$DISPATCH_CONFIG" ]; then
-    for candidate in "$SCRIPT_DIR/dispatch-config.json" "$SCRIPT_DIR/../dispatch-config.json" "/root/.openclaw/skills/coding-agent/scripts/dispatch-config.json"; do
+    for candidate in "$SCRIPT_DIR/dispatch-config.json" "$SCRIPT_DIR/../dispatch-config.json" "/home/ubuntu/.openclaw/skills/coding-agent/scripts/dispatch-config.json"; do
         if [ -f "$candidate" ]; then DISPATCH_CONFIG="$candidate"; break; fi
     done
 fi
@@ -138,16 +138,16 @@ openclaw message send --channel feishu --target \"${FEISHU_TARGET}\" --message \
 
 即使任务失败，也必须发送失败原因和已完成的阶段信息。这是强制要求，不可省略。
 
-5. 出错脚本修复、验证与 git 提交：任务结束前，对执行过程中出错的脚本进行修复；修复后必须重新运行验证，确认输出符合预期才算完成，禁止只修改不验证。凡是修复了脚本，验证通过后必须进入 /root/.openclaw 仓库，检查 git status 和 git diff，只提交本次修复涉及的文件，创建 git commit，并 push 到远程仓库。禁止提交无关改动、密钥文件、临时文件或大产物；若提交或 push 失败，必须在飞书失败通知中说明原因。**重要：执行 git add/commit/push 时必须使用 flock 排队锁**，避免多 agent 并行操作同一仓库导致 index.lock 冲突：
+5. 出错脚本修复、验证与 git 提交：任务结束前，对执行过程中出错的脚本进行修复；修复后必须重新运行验证，确认输出符合预期才算完成，禁止只修改不验证。凡是修复了脚本，验证通过后必须进入 /home/ubuntu/.openclaw 仓库，检查 git status 和 git diff，只提交本次修复涉及的文件，创建 git commit，并 push 到远程仓库。禁止提交无关改动、密钥文件、临时文件或大产物；若提交或 push 失败，必须在飞书失败通知中说明原因。**重要：执行 git add/commit/push 时必须使用 flock 排队锁**，避免多 agent 并行操作同一仓库导致 index.lock 冲突：
    \`\`\`bash
-   flock /root/.openclaw/.git/git-commit.lock bash -c 'cd /root/.openclaw && git add <文件> && git commit --no-verify -m \"消息\" && git push origin master'
+   flock /home/ubuntu/.openclaw/.git/git-commit.lock bash -c 'cd /home/ubuntu/.openclaw && git add <文件> && git commit --no-verify -m \"消息\" && git push origin master'
    \`\`\`
    如果获取锁超时（默认等 120 秒），说明其他 agent 正在 commit，等待后重试即可。
 
 6. 经验库读写：
-   - 目录结构：/root/.openclaw/skills/skill-memory/ 按 skill 名分为子目录（如 game-refactor/、code-before/、drbacklink/、wiki-sites/ 等），子目录内是按日期命名的经验文件 <YYYY-MM-DD>.md，同一天的所有任务经验合并到同一个日期文件里。
-   - 子目录推断：读取环境变量 \$CODING_AGENT_TMUX_SESSION，从中去掉末尾的动态参数部分（域名、站点名、序号等任务级变量），剩余的固定前缀即为子目录名（如 game-refactor-part4-homepage-1-superstarbaseballwiki → 子目录 game-refactor/；code-before-example.com → 子目录 code-before/；wiki 站点相关 → 子目录 wiki-sites/）。如不确定，先 ls /root/.openclaw/skills/skill-memory/ 查看所有子目录列表，选择最匹配的。
-   - 文件名：当天日期，即 /root/.openclaw/skills/skill-memory/<子目录>/<YYYY-MM-DD>.md（用执行当天日期，不要用任务名做文件名）。
+   - 目录结构：/home/ubuntu/.openclaw/skills/skill-memory/ 按 skill 名分为子目录（如 game-refactor/、code-before/、drbacklink/、wiki-sites/ 等），子目录内是按日期命名的经验文件 <YYYY-MM-DD>.md，同一天的所有任务经验合并到同一个日期文件里。
+   - 子目录推断：读取环境变量 \$CODING_AGENT_TMUX_SESSION，从中去掉末尾的动态参数部分（域名、站点名、序号等任务级变量），剩余的固定前缀即为子目录名（如 game-refactor-part4-homepage-1-superstarbaseballwiki → 子目录 game-refactor/；code-before-example.com → 子目录 code-before/；wiki 站点相关 → 子目录 wiki-sites/）。如不确定，先 ls /home/ubuntu/.openclaw/skills/skill-memory/ 查看所有子目录列表，选择最匹配的。
+   - 文件名：当天日期，即 /home/ubuntu/.openclaw/skills/skill-memory/<子目录>/<YYYY-MM-DD>.md（用执行当天日期，不要用任务名做文件名）。
    - 执行前：读取该子目录下最近 3 天的日期文件（最近 3 个 <YYYY-MM-DD>.md），把里面的经验条目作为参考，主动规避已知问题。不要读取全部历史文件，只取最近 3 天即可。
    - 执行后：将本次遇到的问题和改进建议追加写入当天的日期文件。同一天多次任务都追加到同一个日期文件，用 ## <本次域名或任务简称> 二级标题区分不同任务段落。如该日期文件不存在则先创建，并在首行写入标题行 # <子目录名> 经验 - <YYYY-MM-DD>，空一行后再追加经验段落。追加格式：
      ## <本次域名或任务简称>
@@ -168,7 +168,7 @@ RUN_MODE="headless"
 TMUX_SOCKET=""
 if [ -n "$ENABLE_TMUX" ]; then
     RUN_MODE="tmux"
-    TMUX_SOCKET_DIR="${CLAWDBOT_TMUX_SOCKET_DIR:-/root/clawdbot-tmux-sockets}"
+    TMUX_SOCKET_DIR="${CLAWDBOT_TMUX_SOCKET_DIR:-/tmp/clawdbot-tmux-sockets}"
     mkdir -p "$TMUX_SOCKET_DIR"
     TMUX_SOCKET="$TMUX_SOCKET_DIR/codex-code.sock"
 fi

@@ -10,7 +10,7 @@ set -uo pipefail
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 RESULT_DIR="${SKILL_DIR}/data"
 LOG="${RESULT_DIR}/hook.log"
-OPENCLAW_BIN="/usr/bin/openclaw"
+OPENCLAW_BIN="$(command -v openclaw || echo /home/ubuntu/.local/share/pnpm/openclaw)"
 
 mkdir -p "$RESULT_DIR" "$RESULT_DIR/tasks"
 

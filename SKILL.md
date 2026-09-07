@@ -44,13 +44,13 @@ allowed-tools: Bash(codex-dispatch:*)
 
 ## 执行命令
 
-后续 agent 按下面模板构造命令。默认安装路径是 `/root/.openclaw/skills/codex-dispatch`。
+后续 agent 按下面模板构造命令。默认安装路径是 `/home/ubuntu/.openclaw/skills/codex-dispatch`。
 
 ```bash
 #!/bin/bash
 set -euo pipefail
 
-CODEX_DISPATCH_ROOT="${CODEX_DISPATCH_ROOT:-/root/.openclaw/skills/codex-dispatch}"
+CODEX_DISPATCH_ROOT="${CODEX_DISPATCH_ROOT:-/home/ubuntu/.openclaw/skills/codex-dispatch}"
 
 USER_TASK="${USER_TASK:?需要提供任务描述}"
 TMUX_SESSION="${TMUX_SESSION:?需要提供 tmux 会话名}"
@@ -133,15 +133,15 @@ dispatch 成功启动后，立即告诉用户：
 
 ```text
 任务已进入 Codex tmux 会话：
-tmux -S /root/clawdbot-tmux-sockets/codex-code.sock attach -t <TMUX_SESSION>
+tmux -S /home/ubuntu/clawdbot-tmux-sockets/codex-code.sock attach -t <TMUX_SESSION>
 
 按 Ctrl+B 然后按 D 可以退出观察，不会终止任务。
 ```
 
 ## 关键文件路径
 
-- Codex dispatch：`/root/.openclaw/skills/codex-dispatch/dispatch-codex.sh`
-- Codex runner：`/root/.openclaw/skills/codex-dispatch/codex_run.py`
-- Codex hook：`/root/.openclaw/skills/codex-dispatch/hooks/notify-agi.sh`
-- tmux socket：`/root/clawdbot-tmux-sockets/codex-code.sock`
-- Codex 任务状态：`/root/.openclaw/skills/codex-dispatch/data/`
+- Codex dispatch：`/home/ubuntu/.openclaw/skills/codex-dispatch/dispatch-codex.sh`
+- Codex runner：`/home/ubuntu/.openclaw/skills/codex-dispatch/codex_run.py`
+- Codex hook：`/home/ubuntu/.openclaw/skills/codex-dispatch/hooks/notify-agi.sh`
+- tmux socket：`/home/ubuntu/clawdbot-tmux-sockets/codex-code.sock`
+- Codex 任务状态：`/home/ubuntu/.openclaw/skills/codex-dispatch/data/`

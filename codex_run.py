@@ -324,7 +324,7 @@ def run_tmux(args: argparse.Namespace) -> int:
         print("tmux not found in PATH; cannot run tmux mode.", file=sys.stderr)
         return 2
 
-    socket_dir = args.tmux_socket_dir or os.environ.get("CLAWDBOT_TMUX_SOCKET_DIR") or "/root/clawdbot-tmux-sockets"
+    socket_dir = args.tmux_socket_dir or os.environ.get("CLAWDBOT_TMUX_SOCKET_DIR") or "/tmp/clawdbot-tmux-sockets"
     Path(socket_dir).mkdir(parents=True, exist_ok=True)
     socket_path = str(Path(socket_dir) / args.tmux_socket_name)
 
