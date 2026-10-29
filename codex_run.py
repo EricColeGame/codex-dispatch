@@ -40,7 +40,11 @@ CODEX_AUTH_MODE = _read_codex_auth_mode()
 
 def codex_model_args(args: argparse.Namespace) -> list[str]:
     model = (args.model or "").strip()
-    return ["-m", model] if model else []
+    result = ["-m", model] if model else []
+    provider = os.environ.get("WEBSITE_CODEX_PROVIDER", "").strip()
+    if provider:
+        result += ["-c", "model_provider=" + json.dumps(provider)]
+    return result
 
 
 def _ensure_directory_trusted(cwd: str | None) -> None:
